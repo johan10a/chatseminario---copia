@@ -56,16 +56,7 @@ def validar_hora(hora_str, fecha_str):
     except:
         return False
 
-import tkinter as tk
-from tkinter import scrolledtext
-from datetime import datetime
-import csv
-import smtplib
-import re
-import requests
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from groq import Groq
+
 
 # API festivos Colombia
 def es_festivo(fecha_str):
@@ -278,8 +269,20 @@ def procesar_entrada(user_input):
         )
         respuesta = completion.choices[0].message.content.strip()
         historial_ia.append({"role": "assistant", "content": respuesta})
-        return respuesta + "\n\n💬 Puedes seguir preguntando. Escribe 'salir' para volver al asistente principal."        
-
+        return respuesta + "\n\n💬 Puedes seguir preguntando. Escribe 'salir' para volver al asistente principal."      
+      
+    if re.search(r"ansiedad|depresión|estres|salud mental|terapia|psicólogo|sentimientos", user_input, re.IGNORECASE): 
+        modo_ia_activo = True
+        historial_ia = [{"role": "system", "content": "Eres un asistente de salud mental, responde con empatía y profesionalismo, al final coloca que llame al la linea gratuita de salud mental #106."}]
+        historial_ia.append({"role": "user", "content": user_input})
+        completion = client.chat.completions.create(
+            messages=historial_ia,
+            model="llama-3.3-70b-versatile"
+        )
+        
+        respuesta = completion.choices[0].message.content.strip()
+        historial_ia.append({"role": "assistant", "content": respuesta})
+        return respuesta + "\n\n💬 Puedes seguir preguntando. Escribe 'salir' para volver al asistente principal." 
     return "❌ Lo siento, no entiendo la consulta. ¿En qué más puedo ayudarte?"
 
 # GUI
