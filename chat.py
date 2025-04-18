@@ -148,7 +148,7 @@ def mostrar_agenda(cedula):
             reader = csv.reader(f)
             citas = list(reader)
         
-        citas_filtradas = [cita for cita in citas if cita[0] == cedula]
+        citas_filtradas = [cita for cita in citas if len(cita) > 0 and cita[0] == cedula]
         if citas_filtradas:
             agenda = "📅 Tus citas agendadas:\n\n"
             for cita in citas_filtradas:
@@ -190,8 +190,8 @@ def procesar_entrada(user_input):
         return respuesta
 
     if esperando_cedula_para_agenda:
-        if not user_input.isdigit() or len(user_input) <= 4:
-            return "❌ La cédula debe ser un número de 4 dígitos."
+        if not user_input.isdigit() or len(user_input) < 4:
+                return "❌ La cédula debe tener mas de 4 dígitosdddd."
         mostrar_agenda(user_input)
         esperando_cedula_para_agenda = False
         return "✅ Esa es tu agenda médica actual."
@@ -203,8 +203,8 @@ def procesar_entrada(user_input):
     if agendando_cita:
         paso = pasos[indice_paso]
         if paso == "cedula":
-            if not user_input.isdigit() or len(user_input) <= 4:
-                return "❌ La cédula debe tener 4 dígitos."
+            if not user_input.isdigit() or len(user_input) < 4:
+                return "❌ La cédula debe tener mas de 4 dígitos."
             datos_cita["cedula"] = user_input
             respuesta = "¿Cuál es tu nombre completo?"
         elif paso == "nombre":
@@ -273,7 +273,28 @@ def procesar_entrada(user_input):
       
     if re.search(r"ansiedad|depresión|estres|salud mental|terapia|psicólogo|sentimientos", user_input, re.IGNORECASE): 
         modo_ia_activo = True
-        historial_ia = [{"role": "system", "content": "Eres un asistente de salud mental, responde con empatía y profesionalismo, al final coloca que llame al la linea gratuita de salud mental #106."}]
+        historial_ia = [{
+    "role": "system", 
+    "content": """
+    Eres un asistente de salud mental, responde con empatía y profesionalismo. 
+    Recuerda que este servicio es solo una ayuda rápida y no un diagnóstico médico. 
+    Al final de cada respuesta, debes incluir este decálogo de responsabilidad:
+
+    1. Este servicio no reemplaza una consulta médica o psicológica profesional.
+    2. Las respuestas proporcionadas son para orientación general y no deben tomarse como consejo médico.
+    3. Si experimentas una crisis emocional, te recomendamos que busques ayuda inmediata de un profesional de la salud.
+    4. El asistente no tiene la capacidad para diagnosticar ni ofrecer tratamientos médicos.
+    5. Si necesitas ayuda urgente, por favor, llama a la línea gratuita de salud mental al #106.
+    6. Recuerda que cada persona es única, y lo que funciona para algunos puede no ser adecuado para todos.
+    7. Este asistente está diseñado para proporcionar información básica y apoyo emocional de forma confidencial.
+    8. Si necesitas una cita médica o psicológica, por favor, contacta con un profesional.
+    9. El asistente está aquí para acompañarte en momentos difíciles, pero no sustituye la atención de emergencia.
+    10. Si alguna respuesta te genera dudas o malestar, no dudes en buscar el consejo de un experto en salud mental.
+
+    Al final de cada respuesta, incluir: "Para ayuda urgente, por favor llama a la línea gratuita de salud mental #106."
+    """
+}]
+
         historial_ia.append({"role": "user", "content": user_input})
         completion = client.chat.completions.create(
             messages=historial_ia,
